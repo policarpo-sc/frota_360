@@ -23,10 +23,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  const response = NextResponse.next();
-  response.headers.set("x-user-role", session.role);
-  response.headers.set("x-username", session.username);
-  return response;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete("x-user-role");
+  requestHeaders.delete("x-username");
+  requestHeaders.set("x-user-role", session.role);
+  requestHeaders.set("x-username", session.username);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

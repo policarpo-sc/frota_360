@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { KpiCard } from "@/components/KpiCard";
+import { isConcluded } from "@/lib/alerts";
 import type { ProjectData } from "@/lib/types";
 
 export function DashboardClient() {
@@ -19,7 +20,7 @@ export function DashboardClient() {
   if (!data) return <p className="p-6 text-red-600">Não foi possível carregar os dados.</p>;
 
   const totalAcoes = data.acoes.length;
-  const concluidas = data.acoes.filter((a) => a.status.trim().toLowerCase() === "concluída").length;
+  const concluidas = data.acoes.filter((a) => isConcluded(a.status)).length;
   const atrasadas = data.acoes.filter((a) => a.alerta === "atrasado").length;
   const emAndamento = data.acoes.filter((a) => a.status.trim().toLowerCase() === "em andamento").length;
   const vagasAtrasadas = data.gente.filter((g) => g.alerta === "atrasado").length;
@@ -31,7 +32,7 @@ export function DashboardClient() {
         <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
           {data.errors.map((e) => (
             <p key={e.source}>
-              Não foi possível atualizar "{e.source}": {e.message}. Última atualização exibida:{" "}
+              Não foi possível atualizar &ldquo;{e.source}&rdquo;: {e.message}. Última atualização exibida:{" "}
               {new Date(data.updatedAt).toLocaleString("pt-BR")}.
             </p>
           ))}
