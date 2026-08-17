@@ -9,8 +9,11 @@ export function AcoesClient() {
   const [rows, setRows] = useState<AcaoRow[]>([]);
   const [error, setError] = useState(false);
   const [ondaFilter, setOndaFilter] = useState("");
+  const [blocoFilter, setBlocoFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [responsavelFilter, setResponsavelFilter] = useState("");
+  const [sortKey, setSortKey] = useState<keyof AcaoRow>("prazoPrevisto");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     fetch("/api/data")
@@ -23,15 +26,37 @@ export function AcoesClient() {
   }, []);
 
   const ondas = useMemo(() => Array.from(new Set(rows.map((r) => r.onda))).sort(), [rows]);
+  const blocos = useMemo(() => Array.from(new Set(rows.map((r) => r.bloco))).filter(Boolean).sort(), [rows]);
   const statuses = useMemo(() => Array.from(new Set(rows.map((r) => r.status))).sort(), [rows]);
 
   const filtered = rows.filter(
     (r) =>
       (!ondaFilter || r.onda === ondaFilter) &&
+      (!blocoFilter || r.bloco === blocoFilter) &&
       (!statusFilter || r.status === statusFilter) &&
       (!responsavelFilter ||
         r.responsavel.toLowerCase().includes(responsavelFilter.toLowerCase()))
   );
+
+  const sorted = useMemo(() => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      const va = a[sortKey];
+      const vb = b[sortKey];
+      const sa = va === null || va === undefined ? "" : String(va);
+      const sb = vb === null || vb === undefined ? "" : String(vb);
+      return sa.localeCompare(sb) * dir;
+    });
+  }, [filtered, sortKey, sortDir]);
+
+  function handleSort(key: keyof AcaoRow) {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
 
   const columns: Column<AcaoRow>[] = [
     { key: "onda", header: "Onda" },
@@ -62,6 +87,18 @@ export function AcoesClient() {
         </select>
         <select
           className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+          value={blocoFilter}
+          onChange={(e) => setBlocoFilter(e.target.value)}
+        >
+          <option value="">Todos os blocos</option>
+          {blocos.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+        <select
+          className="rounded-md border border-slate-300 px-2 py-1 text-sm"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -79,7 +116,7 @@ export function AcoesClient() {
           onChange={(e) => setResponsavelFilter(e.target.value)}
         />
       </div>
-      <DataTable columns={columns} rows={filtered} />
+      <DataTable columns={columns} rows={sorted} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
     </main>
   );
 }
