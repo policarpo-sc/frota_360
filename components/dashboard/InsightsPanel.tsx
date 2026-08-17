@@ -19,7 +19,7 @@ export function InsightsPanel({ rows }: { rows: AcaoRow[] }) {
       pendentesPorBloco.set(r.bloco, (pendentesPorBloco.get(r.bloco) ?? 0) + 1);
     }
   });
-  const topBloco = [...pendentesPorBloco.entries()].sort((a, b) => b[1] - a[1])[0];
+  const topBloco = Array.from(pendentesPorBloco.entries()).sort((a, b) => b[1] - a[1])[0];
 
   const atencaoItems: { tag: "alta" | "media" | "info"; text: string }[] = [];
   if (atrasadas > 0) atencaoItems.push({ tag: "alta", text: `${atrasadas} ações estão com o prazo previsto vencido.` });
