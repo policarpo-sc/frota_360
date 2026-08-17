@@ -53,13 +53,13 @@ function requireFolderId(): string {
   return folderId;
 }
 
-export async function listDriveFiles(): Promise<DriveFile[]> {
+export async function listFolderContents(folderId: string): Promise<DriveFile[]> {
   const client = getClient();
-  const folderId = requireFolderId();
   const response = await client.files.list({
     q: `'${folderId}' in parents and trashed = false`,
     fields: "files(id, name, mimeType, webViewLink)",
-    pageSize: 100,
+    pageSize: 200,
+    orderBy: "folder,name",
   });
   return (response.data.files ?? []).map((f) => ({
     id: f.id ?? "",
@@ -67,6 +67,10 @@ export async function listDriveFiles(): Promise<DriveFile[]> {
     mimeType: f.mimeType ?? "",
     webViewLink: f.webViewLink ?? "",
   }));
+}
+
+export async function listDriveFiles(): Promise<DriveFile[]> {
+  return listFolderContents(requireFolderId());
 }
 
 export async function downloadDriveFile(fileId: string): Promise<Buffer> {

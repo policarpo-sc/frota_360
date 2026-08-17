@@ -12,6 +12,8 @@ Painel de acompanhamento do projeto Frota 360. Ver a spec completa em
      base64 (`base64 -w0 service-account.json`).
    - `GOOGLE_DRIVE_FOLDER_ID`: ID da pasta do Drive com os 3 arquivos do
      projeto (o trecho após `/folders/` na URL da pasta).
+   - `GOOGLE_DOCS_FOLDER_ID`: ID da pasta do Drive com os documentos gerais
+     do projeto (a que aparece navegável na aba Arquivos, com subpastas).
    - `REDIS_URL`: string de conexão do banco Redis (aba "Quickstart" do banco
      na Vercel, seção `.env.local` — ou `vercel env pull` após criar o banco).
    - `SESSION_SECRET`: `openssl rand -base64 32`.
@@ -29,6 +31,7 @@ Painel de acompanhamento do projeto Frota 360. Ver a spec completa em
 2. Na aba Storage, crie e conecte um banco **Redis**.
 3. Em Settings → Environment Variables, adicione todas as variáveis listadas
    acima (`REDIS_URL` fica disponível na aba "Quickstart" do banco criado).
-4. Compartilhe a pasta do Google Drive com o e-mail da conta de serviço
-   (`client_email` dentro do JSON da chave), com permissão de leitura.
+4. Compartilhe as duas pastas do Google Drive (a de dados e a de documentos)
+   com o e-mail da conta de serviço (`client_email` dentro do JSON da chave),
+   com permissão de leitura.
 5. Faça o deploy (`git push` na branch conectada, ou `vercel --prod`).
