@@ -41,20 +41,20 @@ export function InsightsPanel({ rows }: { rows: AcaoRow[] }) {
     .slice(0, 6);
 
   const tagStyle: Record<string, string> = {
-    alta: "bg-red-50 text-red-700",
-    media: "bg-amber-50 text-amber-700",
-    info: "bg-slate-100 text-slate-600",
+    alta: "bg-[#FBE7E7] text-[#C00000]",
+    media: "bg-[#FDF3DA] text-[#C08A00]",
+    info: "bg-[#EEF0F3] text-[#7C8698]",
   };
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="rounded-lg border border-slate-200 bg-white">
-        <div className="rounded-t-lg bg-red-600 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white">
+      <div className="overflow-hidden rounded-lg border border-[#E2E6ED] bg-white">
+        <div className="bg-[#C00000] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white">
           Pontos de Atenção
         </div>
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-[#E2E6ED]">
           {atencaoItems.length === 0 && (
-            <li className="p-4 text-center text-sm text-slate-500">Nenhum ponto crítico identificado.</li>
+            <li className="p-4 text-center text-sm text-[#64748A]">Nenhum ponto crítico identificado.</li>
           )}
           {atencaoItems.map((item, i) => (
             <li key={i} className="flex items-start gap-2 px-4 py-2 text-[12.8px]">
@@ -67,20 +67,20 @@ export function InsightsPanel({ rows }: { rows: AcaoRow[] }) {
         </ul>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white">
-        <div className="rounded-t-lg bg-emerald-700 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white">
+      <div className="overflow-hidden rounded-lg border border-[#E2E6ED] bg-white">
+        <div className="bg-[#1D8A4A] px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white">
           Próximos Passos
         </div>
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-[#E2E6ED]">
           {proximos.length === 0 && (
-            <li className="p-4 text-center text-sm text-slate-500">Nenhuma ação com prazo definido.</li>
+            <li className="p-4 text-center text-sm text-[#64748A]">Nenhuma ação com prazo definido.</li>
           )}
           {proximos.map((r, i) => (
             <li key={i} className="flex items-start gap-2 px-4 py-2 text-[12.8px]">
-              <span className="shrink-0 text-slate-500">{fmtDate(r.prazoPrevisto)}</span>
-              <span>
+              <span className="shrink-0 text-[#64748A]">{fmtDate(r.prazoPrevisto)}</span>
+              <span className="flex-1">
                 <b>{r.bloco}</b> — {r.tarefa || r.acao}
-                <span className="block text-[11.5px] text-slate-500">{r.responsavel || "Sem responsável"}</span>
+                <span className="block text-[11.5px] text-[#64748A]">{r.responsavel || "Sem responsável"}</span>
               </span>
               <StatusBadge alerta={r.alerta} />
             </li>

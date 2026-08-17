@@ -36,6 +36,8 @@ export function StatusDonut({ counts }: { counts: Record<string, number> }) {
       },
       options: {
         cutout: "62%",
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } },
         },

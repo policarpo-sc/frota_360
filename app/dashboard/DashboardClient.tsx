@@ -10,6 +10,7 @@ import { BlocoStackedBar, type BlocoCounts } from "@/components/dashboard/BlocoS
 import { MonthBarChart } from "@/components/dashboard/MonthBarChart";
 import { InsightsPanel } from "@/components/dashboard/InsightsPanel";
 import { DashboardFilterBar, type DashboardFilters } from "@/components/dashboard/DashboardFilterBar";
+import { DashboardCard } from "@/components/dashboard/DashboardCard";
 
 const EMPTY_FILTERS: DashboardFilters = { bloco: "", status: "", atende: "", responsavel: "", search: "" };
 
@@ -121,7 +122,7 @@ export function DashboardClient() {
   if (!data) return <p className="p-6 text-red-600">Não foi possível carregar os dados.</p>;
 
   return (
-    <main className="p-6">
+    <main className="min-h-screen bg-[#EEF1F5] p-6">
       {data.errors.length > 0 && (
         <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
           {data.errors.map((e) => (
@@ -133,7 +134,7 @@ export function DashboardClient() {
         </div>
       )}
 
-      <h1 className="mb-4 text-lg font-semibold text-slate-900">Visão geral do projeto</h1>
+      <h1 className="mb-4 text-lg font-bold uppercase tracking-wide text-[#1F2937]">Visão geral do projeto</h1>
 
       <DashboardFilterBar
         filters={filters}
@@ -146,49 +147,35 @@ export function DashboardClient() {
       />
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <KpiCard label="Total de ações" value={totalAcoes} />
-        <KpiCard label="Concluídas" value={concluidas} />
-        <KpiCard label="Em andamento" value={emAndamento} tone={emAndamento > 0 ? "warning" : "default"} />
-        <KpiCard label="Não iniciadas" value={naoIniciadas} />
-        <KpiCard label="Atrasadas" value={atrasadas} tone={atrasadas > 0 ? "danger" : "default"} />
+        <KpiCard label="Total de ações" value={totalAcoes} tone="default" />
+        <KpiCard label="Concluídas" value={concluidas} tone="success" />
+        <KpiCard label="Em andamento" value={emAndamento} tone="warning" />
+        <KpiCard label="Não iniciadas" value={naoIniciadas} tone="muted" />
+        <KpiCard label="Atrasadas" value={atrasadas} tone="danger" />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Tempo de projeto decorrido
-          </h2>
+        <DashboardCard title="Tempo de Projeto Decorrido">
           <ProjectGauge />
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Progresso geral</h2>
+        </DashboardCard>
+        <DashboardCard title="Progresso Geral">
           <StatusDonut counts={statusCounts} />
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Progresso de ações por bloco
-          </h2>
+        </DashboardCard>
+        <DashboardCard title="Progresso de Ações por Bloco">
           <BlocoStackedBar data={blocoCounts} />
-        </div>
+        </DashboardCard>
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Ações por mês (prazo previsto)
-          </h2>
+        <DashboardCard title="Ações por Mês (Prazo Previsto)">
           <MonthBarChart counts={monthCounts} />
-        </div>
+        </DashboardCard>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <KpiCard
-            label="Vagas atrasadas"
-            value={vagasAtrasadas}
-            tone={vagasAtrasadas > 0 ? "warning" : "default"}
-          />
+          <KpiCard label="Vagas atrasadas" value={vagasAtrasadas} tone={vagasAtrasadas > 0 ? "warning" : "muted"} />
           <KpiCard
             label="Investimentos atrasados"
             value={investimentosAtrasados}
-            tone={investimentosAtrasados > 0 ? "warning" : "default"}
+            tone={investimentosAtrasados > 0 ? "warning" : "muted"}
           />
         </div>
       </div>
@@ -197,7 +184,7 @@ export function DashboardClient() {
         <InsightsPanel rows={filtered} />
       </div>
 
-      <p className="mt-6 text-xs text-slate-400">
+      <p className="mt-6 text-xs text-[#7C8698]">
         Última atualização: {new Date(data.updatedAt).toLocaleString("pt-BR")}
       </p>
     </main>
