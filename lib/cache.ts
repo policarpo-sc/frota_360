@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { kv } from "./redisClient";
 
 const DEFAULT_TTL_SECONDS = 15 * 60;
 

@@ -10,9 +10,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@vercel/kv": "^0.2.4",
     "bcryptjs": "^2.4.3",
     "googleapis": "^118.0.0",
+    "ioredis": "^5.4.1",
     "jose": "^5.4.1",
     "next": "14.2.35",
     "react": "^18",

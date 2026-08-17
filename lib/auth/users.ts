@@ -1,4 +1,4 @@
-import { kv as vercelKv } from "@vercel/kv";
+import { kv as vercelKv } from "../redisClient";
 import bcrypt from "bcryptjs";
 import type { User, UserRole } from "../types";
 
