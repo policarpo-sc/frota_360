@@ -144,17 +144,6 @@ export function DashboardClient({ role }: { role: UserRole }) {
     <main className="min-h-screen bg-[#EEF1F5] p-6">
       <ProjectBanner role={role} onRefreshed={loadData} />
 
-      {data.errors.length > 0 && (
-        <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
-          {data.errors.map((e) => (
-            <p key={e.source}>
-              Não foi possível atualizar &ldquo;{e.source}&rdquo;: {e.message}. Última atualização exibida:{" "}
-              {new Date(data.updatedAt).toLocaleString("pt-BR")}.
-            </p>
-          ))}
-        </div>
-      )}
-
       <DashboardFilterBar
         filters={filters}
         setFilters={setFilters}
