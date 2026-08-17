@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isConcluded } from "@/lib/alerts";
-import type { AcaoRow, AlertLevel, ProjectData, UserRole } from "@/lib/types";
+import type { AlertLevel, ProjectData, UserRole } from "@/lib/types";
 import { ProjectGauge } from "@/components/dashboard/ProjectGauge";
 import { TotalRingCard, type RingBadge } from "@/components/dashboard/TotalRingCard";
 import { StatusHalfDonut } from "@/components/dashboard/StatusHalfDonut";
@@ -58,7 +58,7 @@ export function DashboardClient({ role }: { role: UserRole }) {
     loadData();
   }, [loadData]);
 
-  const acoes = data?.acoes ?? [];
+  const acoes = useMemo(() => data?.acoes ?? [], [data]);
 
   const blocos = useMemo(() => Array.from(new Set(acoes.map((r) => r.bloco))).filter(Boolean).sort(), [acoes]);
   const statuses = useMemo(() => Array.from(new Set(acoes.map((r) => r.status))).filter(Boolean).sort(), [acoes]);
