@@ -1,34 +1,49 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { KpiCard } from "@/components/KpiCard";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isConcluded } from "@/lib/alerts";
-import type { AcaoRow, ProjectData } from "@/lib/types";
+import type { AcaoRow, AlertLevel, ProjectData, UserRole } from "@/lib/types";
 import { ProjectGauge } from "@/components/dashboard/ProjectGauge";
-import { StatusDonut } from "@/components/dashboard/StatusDonut";
-import { BlocoStackedBar, type BlocoCounts } from "@/components/dashboard/BlocoStackedBar";
-import { MonthBarChart } from "@/components/dashboard/MonthBarChart";
+import { TotalRingCard, type RingBadge } from "@/components/dashboard/TotalRingCard";
+import { StatusHalfDonut } from "@/components/dashboard/StatusHalfDonut";
+import { OndaDonut } from "@/components/dashboard/OndaDonut";
 import { InsightsPanel } from "@/components/dashboard/InsightsPanel";
 import { DashboardFilterBar, type DashboardFilters } from "@/components/dashboard/DashboardFilterBar";
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
+import { ProjectBanner } from "@/components/dashboard/ProjectBanner";
 
 const EMPTY_FILTERS: DashboardFilters = { bloco: "", status: "", atende: "", responsavel: "", search: "" };
 
-function effectiveStatus(r: AcaoRow): string {
-  return r.alerta === "atrasado" ? "Atrasado" : r.status;
+const STATUS_RING_COLORS = {
+  "Concluída": "#0F9D58",
+  "Em andamento": "#C08A00",
+  Atrasado: "#C00000",
+  "Não Iniciado": "#7C8698",
+};
+
+function categorize(status: string, alerta: AlertLevel): keyof typeof STATUS_RING_COLORS {
+  if (alerta === "atrasado") return "Atrasado";
+  if (isConcluded(status)) return "Concluída";
+  if (status.trim().toLowerCase() === "em andamento") return "Em andamento";
+  return "Não Iniciado";
 }
 
-function monthLabel(isoDate: string): string {
-  const d = new Date(isoDate);
-  return d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }).replace(".", "");
+function statusCountsToRing(counts: Record<string, number>): RingBadge[] {
+  return [
+    { label: "Concluída", value: counts["Concluída"] ?? 0, color: STATUS_RING_COLORS["Concluída"], position: "top-left" },
+    { label: "Em andamento", value: counts["Em andamento"] ?? 0, color: STATUS_RING_COLORS["Em andamento"], position: "top-right" },
+    { label: "Atrasadas", value: counts["Atrasado"] ?? 0, color: STATUS_RING_COLORS["Atrasado"], position: "bottom-left" },
+    { label: "Não Iniciadas", value: counts["Não Iniciado"] ?? 0, color: STATUS_RING_COLORS["Não Iniciado"], position: "bottom-right" },
+  ];
 }
 
-export function DashboardClient() {
+export function DashboardClient({ role }: { role: UserRole }) {
   const [data, setData] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
+    setLoading(true);
     fetch("/api/data")
       .then((res) => {
         if (!res.ok) throw new Error("Falha ao carregar dados");
@@ -38,6 +53,10 @@ export function DashboardClient() {
       .catch(() => setData(null))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const acoes = data?.acoes ?? [];
 
@@ -55,7 +74,7 @@ export function DashboardClient() {
       if (filters.status) {
         if (filters.status === "__atrasado__") {
           if (r.alerta !== "atrasado") return false;
-        } else if (effectiveStatus(r) !== filters.status) {
+        } else if (r.status !== filters.status) {
           return false;
         }
       }
@@ -70,59 +89,61 @@ export function DashboardClient() {
     });
   }, [acoes, filters]);
 
-  const totalAcoes = filtered.length;
-  const concluidas = filtered.filter((a) => isConcluded(a.status)).length;
-  const atrasadas = filtered.filter((a) => a.alerta === "atrasado").length;
-  const emAndamento = filtered.filter(
-    (a) => a.status.trim().toLowerCase() === "em andamento" && a.alerta !== "atrasado"
-  ).length;
-  const naoIniciadas = filtered.filter(
-    (a) => a.status.trim().toLowerCase() === "não iniciado" && a.alerta !== "atrasado"
-  ).length;
-
-  const vagasAtrasadas = (data?.gente ?? []).filter((g) => g.alerta === "atrasado").length;
-  const investimentosAtrasados = (data?.investimento ?? []).filter((i) => i.alerta === "atrasado").length;
-
-  const statusCounts = useMemo(() => {
+  const acoesStatusCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     filtered.forEach((r) => {
-      const s = effectiveStatus(r);
-      counts[s] = (counts[s] ?? 0) + 1;
+      const cat = categorize(r.status, r.alerta);
+      counts[cat] = (counts[cat] ?? 0) + 1;
     });
     return counts;
   }, [filtered]);
 
-  const blocoCounts: BlocoCounts[] = useMemo(() => {
-    const map = new Map<string, Record<string, number>>();
-    filtered.forEach((r) => {
-      const key = r.bloco || "—";
-      const entry = map.get(key) ?? {};
-      const s = effectiveStatus(r);
-      entry[s] = (entry[s] ?? 0) + 1;
-      map.set(key, entry);
+  const condicionantesCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    (data?.gente ?? []).forEach((r) => {
+      const cat = categorize(r.status, r.alerta);
+      counts[cat] = (counts[cat] ?? 0) + 1;
     });
-    return Array.from(map.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([bloco, counts]) => ({ bloco, counts }));
-  }, [filtered]);
+    (data?.investimento ?? []).forEach((r) => {
+      const cat = categorize(r.status, r.alerta);
+      counts[cat] = (counts[cat] ?? 0) + 1;
+    });
+    return counts;
+  }, [data]);
 
-  const monthCounts = useMemo(() => {
+  const ondaCounts = useMemo(() => {
     const map = new Map<string, number>();
     filtered.forEach((r) => {
-      if (!r.prazoPrevisto) return;
-      const key = r.prazoPrevisto.slice(0, 7);
+      const key = r.onda || "—";
       map.set(key, (map.get(key) ?? 0) + 1);
     });
     return Array.from(map.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([key, count]) => ({ label: monthLabel(`${key}-01`), count }));
+      .map(([label, value]) => ({ label, value }));
   }, [filtered]);
+
+  const perOndaStatusCounts = useMemo(() => {
+    const map = new Map<string, Record<string, number>>();
+    filtered.forEach((r) => {
+      const key = r.onda || "—";
+      const entry = map.get(key) ?? {};
+      const cat = categorize(r.status, r.alerta);
+      entry[cat] = (entry[cat] ?? 0) + 1;
+      map.set(key, entry);
+    });
+    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [filtered]);
+
+  const totalAcoes = filtered.length;
+  const totalCondicionantes = (data?.gente ?? []).length + (data?.investimento ?? []).length;
 
   if (loading) return <p className="p-6 text-slate-500">Carregando...</p>;
   if (!data) return <p className="p-6 text-red-600">Não foi possível carregar os dados.</p>;
 
   return (
     <main className="min-h-screen bg-[#EEF1F5] p-6">
+      <ProjectBanner role={role} onRefreshed={loadData} />
+
       {data.errors.length > 0 && (
         <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
           {data.errors.map((e) => (
@@ -134,8 +155,6 @@ export function DashboardClient() {
         </div>
       )}
 
-      <h1 className="mb-4 text-lg font-bold uppercase tracking-wide text-[#1F2937]">Visão geral do projeto</h1>
-
       <DashboardFilterBar
         filters={filters}
         setFilters={setFilters}
@@ -146,38 +165,30 @@ export function DashboardClient() {
         resultCount={totalAcoes}
       />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        <KpiCard label="Total de ações" value={totalAcoes} tone="default" />
-        <KpiCard label="Concluídas" value={concluidas} tone="success" />
-        <KpiCard label="Em andamento" value={emAndamento} tone="warning" />
-        <KpiCard label="Não iniciadas" value={naoIniciadas} tone="muted" />
-        <KpiCard label="Atrasadas" value={atrasadas} tone="danger" />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardCard title="Tempo de Projeto Decorrido">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <DashboardCard title="Distância Percorrida">
           <ProjectGauge />
         </DashboardCard>
-        <DashboardCard title="Progresso Geral">
-          <StatusDonut counts={statusCounts} />
+        <DashboardCard title="Total das Ações">
+          <TotalRingCard total={totalAcoes} badges={statusCountsToRing(acoesStatusCounts)} />
         </DashboardCard>
-        <DashboardCard title="Progresso de Ações por Bloco">
-          <BlocoStackedBar data={blocoCounts} />
+        <DashboardCard title="Condicionantes Críticos">
+          <TotalRingCard total={totalCondicionantes} badges={statusCountsToRing(condicionantesCounts)} />
+        </DashboardCard>
+        <DashboardCard title="Status Geral das Ações">
+          <StatusHalfDonut counts={acoesStatusCounts} />
         </DashboardCard>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <DashboardCard title="Ações por Mês (Prazo Previsto)">
-          <MonthBarChart counts={monthCounts} />
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <DashboardCard title="Ações por Ondas">
+          <OndaDonut counts={ondaCounts} />
         </DashboardCard>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <KpiCard label="Vagas atrasadas" value={vagasAtrasadas} tone={vagasAtrasadas > 0 ? "warning" : "muted"} />
-          <KpiCard
-            label="Investimentos atrasados"
-            value={investimentosAtrasados}
-            tone={investimentosAtrasados > 0 ? "warning" : "muted"}
-          />
-        </div>
+        {perOndaStatusCounts.map(([onda, counts]) => (
+          <DashboardCard key={onda} title={`Status Ações ${onda}`}>
+            <StatusHalfDonut counts={counts} showLegend={false} />
+          </DashboardCard>
+        ))}
       </div>
 
       <div className="mt-4">

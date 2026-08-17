@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import { Chart, type ChartConfiguration } from "chart.js/auto";
 
-export function MonthBarChart({ counts }: { counts: { label: string; count: number }[] }) {
+const ONDA_PALETTE = ["#1F2937", "#6699CC", "#94A3B8", "#8B5CF6", "#0EA5E9", "#F59E0B"];
+
+export function OndaDonut({ counts }: { counts: { label: string; value: number }[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
@@ -11,25 +13,25 @@ export function MonthBarChart({ counts }: { counts: { label: string; count: numb
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const config: ChartConfiguration<"bar"> = {
-      type: "bar",
+    const config: ChartConfiguration<"doughnut"> = {
+      type: "doughnut",
       data: {
         labels: counts.map((c) => c.label),
         datasets: [
           {
-            data: counts.map((c) => c.count),
-            backgroundColor: "#4472C4",
-            borderRadius: 4,
+            data: counts.map((c) => c.value),
+            backgroundColor: counts.map((_, i) => ONDA_PALETTE[i % ONDA_PALETTE.length]),
+            borderWidth: 2,
+            borderColor: "#fff",
           },
         ],
       },
       options: {
+        cutout: "55%",
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#EEF1F5" } },
-          x: { grid: { display: false } },
+        plugins: {
+          legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } },
         },
       },
     };
@@ -44,7 +46,7 @@ export function MonthBarChart({ counts }: { counts: { label: string; count: numb
   }, [counts]);
 
   return (
-    <div className="relative h-[260px]">
+    <div className="relative mx-auto h-[220px] w-full max-w-[230px]">
       <canvas ref={canvasRef} />
     </div>
   );

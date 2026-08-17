@@ -8,7 +8,7 @@ export default function DashboardPage() {
   return (
     <>
       <NavBar role={role} />
-      <DashboardClient />
+      <DashboardClient role={role} />
     </>
   );
 }
