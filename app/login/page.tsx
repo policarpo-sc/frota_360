@@ -4,7 +4,9 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function isSafeNextPath(next: string | null): next is string {
-  return !!next && next.startsWith("/") && !next.startsWith("//");
+  return (
+    !!next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\")
+  );
 }
 
 function LoginForm() {

@@ -14,7 +14,10 @@ export function AcoesClient() {
 
   useEffect(() => {
     fetch("/api/data")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Falha ao carregar dados");
+        return res.json();
+      })
       .then((d: ProjectData) => setRows(d.acoes))
       .catch(() => setError(true));
   }, []);

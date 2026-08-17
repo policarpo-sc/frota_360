@@ -10,7 +10,10 @@ export function ArquivosClient() {
 
   useEffect(() => {
     fetch("/api/files")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Falha ao carregar arquivos");
+        return res.json();
+      })
       .then((f: DriveFile[]) => setFiles(f))
       .catch(() => setError(true))
       .finally(() => setLoading(false));

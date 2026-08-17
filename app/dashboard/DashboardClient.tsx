@@ -11,8 +11,12 @@ export function DashboardClient() {
 
   useEffect(() => {
     fetch("/api/data")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Falha ao carregar dados");
+        return res.json();
+      })
       .then((d: ProjectData) => setData(d))
+      .catch(() => setData(null))
       .finally(() => setLoading(false));
   }, []);
 
