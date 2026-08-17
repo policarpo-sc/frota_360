@@ -21,6 +21,7 @@ describe("drive client", () => {
       },
     });
 
+    process.env.GOOGLE_DRIVE_FOLDER_ID = "test-folder";
     const files = await listDriveFiles();
     expect(files).toEqual([
       {
