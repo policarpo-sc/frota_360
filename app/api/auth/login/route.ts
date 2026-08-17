@@ -13,8 +13,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: GENERIC_ERROR }, { status: 400 });
   }
 
-  await ensureSeedAdmin();
-  const user = await verifyPassword(username, password);
+  let user;
+  try {
+    await ensureSeedAdmin();
+    user = await verifyPassword(username, password);
+  } catch {
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
+  }
+
   if (!user) {
     return NextResponse.json({ error: GENERIC_ERROR }, { status: 401 });
   }
