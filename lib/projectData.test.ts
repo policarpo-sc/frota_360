@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { __setDriveClientForTests } from "./drive";
 
 const kvStore = new Map<string, unknown>();
-vi.mock("@vercel/kv", () => ({
+vi.mock("./redisClient", () => ({
   kv: {
     get: async (key: string) => kvStore.get(key) ?? null,
     set: async (key: string, value: unknown) => {
