@@ -3,13 +3,17 @@ import type { AlertLevel } from "./types";
 const WARNING_WINDOW_DAYS = 7;
 const CONCLUDED_STATUSES = new Set(["concluída", "concluida"]);
 
+export function isConcluded(status: string): boolean {
+  return CONCLUDED_STATUSES.has(status.trim().toLowerCase());
+}
+
 export function computeAlert(
   status: string,
   prazoPrevisto: string | null,
   today: Date = new Date()
 ): AlertLevel {
   if (!prazoPrevisto) return "normal";
-  if (CONCLUDED_STATUSES.has(status.trim().toLowerCase())) return "normal";
+  if (isConcluded(status)) return "normal";
 
   const prazo = new Date(prazoPrevisto);
   if (Number.isNaN(prazo.getTime())) return "normal";

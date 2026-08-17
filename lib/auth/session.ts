@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import type { UserRole } from "../types";
 
 export const SESSION_COOKIE_NAME = "frota360_session";
-const SESSION_DURATION_SECONDS = 60 * 60 * 8; // 8 hours
+export const SESSION_DURATION_SECONDS = 60 * 60 * 8; // 8 hours
 
 export interface SessionPayload {
   username: string;

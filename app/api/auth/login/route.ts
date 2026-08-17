@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ensureSeedAdmin, verifyPassword } from "@/lib/auth/users";
-import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth/session";
+import { createSessionToken, SESSION_COOKIE_NAME, SESSION_DURATION_SECONDS } from "@/lib/auth/session";
 
 const GENERIC_ERROR = "Usuário ou senha inválidos.";
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 8,
+    maxAge: SESSION_DURATION_SECONDS,
   });
   return response;
 }
