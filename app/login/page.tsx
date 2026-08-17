@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function isSafeNextPath(next: string | null): next is string {
+  return !!next && next.startsWith("/") && !next.startsWith("//");
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +30,8 @@ export default function LoginPage() {
         setError(data.error ?? "Usuário ou senha inválidos.");
         return;
       }
-      router.push("/dashboard");
+      const next = searchParams.get("next");
+      router.push(isSafeNextPath(next) ? next : "/dashboard");
       router.refresh();
     } finally {
       setLoading(false);
@@ -68,5 +74,13 @@ export default function LoginPage() {
         </button>
       </form>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

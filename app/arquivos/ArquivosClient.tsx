@@ -6,15 +6,26 @@ import type { DriveFile } from "@/lib/drive";
 export function ArquivosClient() {
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/files")
       .then((res) => res.json())
       .then((f: DriveFile[]) => setFiles(f))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <main className="p-6 text-slate-500">Carregando...</main>;
+
+  if (error) {
+    return (
+      <main className="p-6">
+        <h1 className="mb-4 text-lg font-semibold text-slate-900">Arquivos do projeto</h1>
+        <p className="text-red-600">Não foi possível carregar os arquivos.</p>
+      </main>
+    );
+  }
 
   return (
     <main className="p-6">

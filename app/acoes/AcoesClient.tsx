@@ -7,6 +7,7 @@ import type { AcaoRow, ProjectData } from "@/lib/types";
 
 export function AcoesClient() {
   const [rows, setRows] = useState<AcaoRow[]>([]);
+  const [error, setError] = useState(false);
   const [ondaFilter, setOndaFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [responsavelFilter, setResponsavelFilter] = useState("");
@@ -14,7 +15,8 @@ export function AcoesClient() {
   useEffect(() => {
     fetch("/api/data")
       .then((res) => res.json())
-      .then((d: ProjectData) => setRows(d.acoes));
+      .then((d: ProjectData) => setRows(d.acoes))
+      .catch(() => setError(true));
   }, []);
 
   const ondas = useMemo(() => Array.from(new Set(rows.map((r) => r.onda))).sort(), [rows]);
@@ -41,6 +43,7 @@ export function AcoesClient() {
   return (
     <main className="p-6">
       <h1 className="mb-4 text-lg font-semibold text-slate-900">Ações</h1>
+      {error && <p className="mb-4 text-sm text-red-600">Não foi possível carregar os dados.</p>}
       <div className="mb-4 flex flex-wrap gap-3">
         <select
           className="rounded-md border border-slate-300 px-2 py-1 text-sm"

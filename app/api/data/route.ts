@@ -10,7 +10,11 @@ function redactForViewer(data: ProjectData): ProjectData {
 }
 
 export async function GET(request: NextRequest) {
-  const data = await getProjectData();
-  const role = request.headers.get("x-user-role");
-  return NextResponse.json(role === "admin" ? data : redactForViewer(data));
+  try {
+    const data = await getProjectData();
+    const role = request.headers.get("x-user-role");
+    return NextResponse.json(role === "admin" ? data : redactForViewer(data));
+  } catch {
+    return NextResponse.json({ error: "Não foi possível carregar os dados." }, { status: 500 });
+  }
 }

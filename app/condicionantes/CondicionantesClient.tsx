@@ -7,12 +7,14 @@ import type { GenteRow, InvestimentoRow, ProjectData, UserRole } from "@/lib/typ
 
 export function CondicionantesClient({ role }: { role: UserRole }) {
   const [data, setData] = useState<ProjectData | null>(null);
+  const [error, setError] = useState(false);
   const [tab, setTab] = useState<"gente" | "investimento">("gente");
 
   useEffect(() => {
     fetch("/api/data")
       .then((res) => res.json())
-      .then((d: ProjectData) => setData(d));
+      .then((d: ProjectData) => setData(d))
+      .catch(() => setError(true));
   }, []);
 
   const genteColumns: Column<GenteRow>[] = [
@@ -59,7 +61,9 @@ export function CondicionantesClient({ role }: { role: UserRole }) {
           Investimento
         </button>
       </div>
-      {!data ? (
+      {error ? (
+        <p className="text-red-600">Não foi possível carregar os dados.</p>
+      ) : !data ? (
         <p className="text-slate-500">Carregando...</p>
       ) : tab === "gente" ? (
         <DataTable columns={genteColumns} rows={data.gente} />
