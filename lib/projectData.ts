@@ -37,6 +37,7 @@ export async function getProjectData(
   for (const matcher of FILE_MATCHERS) {
     const file = files.find((f) => matcher.test(f.name));
     if (!file) {
+      errors.push({ source: matcher.source, message: "Arquivo não encontrado na pasta do Drive" });
       continue;
     }
     try {

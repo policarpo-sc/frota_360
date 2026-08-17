@@ -106,6 +106,10 @@ describe("getProjectData", () => {
     const { getProjectData } = await import("./projectData");
     const data = await getProjectData({ forceRefresh: true });
     expect(data.acoes).toHaveLength(0);
-    expect(data.errors).toEqual([{ source: "acoes", message: "network error" }]);
+    expect(data.errors).toEqual([
+      { source: "acoes", message: "network error" },
+      { source: "gente", message: "Arquivo não encontrado na pasta do Drive" },
+      { source: "investimento", message: "Arquivo não encontrado na pasta do Drive" },
+    ]);
   });
 });
